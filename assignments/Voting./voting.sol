@@ -30,7 +30,8 @@ contract Ballot {
     constructor(bytes32[] memory proposalNames) {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
-
+        // set starttime to current block time
+        startTime = block.timestamp;
         
         for (uint i = 0; i < proposalNames.length; i++) {
             
@@ -88,7 +89,7 @@ contract Ballot {
 
     modifier voteEnded () {
         // voting period must be less than 5 minutes
-        require (startTime < 5 minutes);
+        require (block.timestamp - startTime < 5 minutes, "voting period is over");
         _;
     }
     
@@ -98,10 +99,8 @@ contract Ballot {
         require(!sender.voted, "Already voted.");
         sender.voted = true;
         sender.vote = proposal;
-        // when first voted is casted, start the voting period
-        if (proposals[proposal].voteCount == 0){
-            startTime = block.timestamp;
-        }
+        
+        
         
         proposals[proposal].voteCount += sender.weight;
     }
